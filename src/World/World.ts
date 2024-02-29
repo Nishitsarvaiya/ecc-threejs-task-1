@@ -2,17 +2,22 @@ import {
 	AmbientLight,
 	Clock,
 	DirectionalLight,
+	Mesh,
 	PerspectiveCamera,
 	Raycaster,
 	Scene,
 	Vector2,
+	Vector3,
 	WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import CubeObject from "../objects/CubeObject";
 import IcoSphereObject from "../objects/IcoSphereObject";
 import CylinderObject from "../objects/CylinderObject";
-import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
+import CubeGui from "../gui/CubeGui";
+import IcoGui from "../gui/IcoGui";
+import CylinderGui from "../gui/CylinderGui";
+import { fitCameraToObject } from "../helpers";
 
 export default class World {
 	_vw!: number;
@@ -27,7 +32,12 @@ export default class World {
 	_raycaster!: Raycaster;
 	_pointer!: Vector2;
 	_objects!: any[];
-	_gui!: GUI;
+	_cubeGui!: CubeGui;
+	_icoGui!: IcoGui;
+	_cylinderGui!: CylinderGui;
+	_cubeConfig!: CubeConfig;
+	_icoConfig!: IcoConfig;
+	_cylinderConfig!: CylinderConfig;
 
 	constructor() {
 		this.initWorld();
@@ -38,6 +48,21 @@ export default class World {
 	 * 	@memberof World
 	 */
 	initWorld() {
+		// Initialise the parameters of the Geometries
+		this._cubeConfig = {
+			width: 1.5,
+			height: 1.5,
+			depth: 1.5,
+		};
+		this._icoConfig = {
+			radius: 1,
+			detail: 1,
+		};
+		this._cylinderConfig = {
+			radius: 1,
+			height: 2.5,
+		};
+
 		// Get the viewport
 		this._vw = window.innerWidth;
 		this._vh = window.innerHeight;
@@ -86,9 +111,9 @@ export default class World {
 	}
 
 	createObjects() {
-		const cube = new CubeObject(1.5, 1.5, 1.5, 32, 32);
-		const ico = new IcoSphereObject(1, 1);
-		const cylinder = new CylinderObject(1, 1, 2.5, 32, 32);
+		const cube = new CubeObject(this._cubeConfig);
+		const ico = new IcoSphereObject(this._icoConfig);
+		const cylinder = new CylinderObject(this._cylinderConfig);
 
 		cube._mesh.position.set(-4, 0, 0);
 		cylinder._mesh.position.set(4, 0, 0);
@@ -108,10 +133,6 @@ export default class World {
 		this._pointer = new Vector2(-1, -1);
 	}
 
-	createGUI() {
-		this._gui = new GUI();
-	}
-
 	onPointerMove(event: MouseEvent) {
 		// calculate pointer position in normalized device coordinates
 		// (-1 to +1) for both components
@@ -126,10 +147,18 @@ export default class World {
 		// calculate objects intersecting the picking ray
 		const intersects = this._raycaster.intersectObjects(this._scene.children);
 
-		for (let i = 0; i < intersects.length; i++) {
-			console.log(intersects[i].object.userData);
-			intersects[i].object.userData.click();
+		if (intersects.length > 0) {
+			for (let i = 0; i < intersects.length; i++) {
+				intersects[i].object.userData.click();
+			}
 		}
+	}
+
+	resetCamera() {
+		this._camera.position.set(0, 0, 10);
+		this._camera.lookAt(0, 0, 0);
+		this._camera.updateProjectionMatrix();
+		this._controls.target = new Vector3(0, 0, 0);
 	}
 
 	update = () => {

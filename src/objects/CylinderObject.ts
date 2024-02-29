@@ -1,25 +1,58 @@
 import { Mesh, MeshStandardMaterial, CylinderGeometry } from "three";
+import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
 
 export default class CylinderObject {
 	_geometry: CylinderGeometry;
 	_material: MeshStandardMaterial;
 	_mesh: Mesh;
+	_cylinderGui!: GUI;
+	_data!: { radius: number; height: number };
+	_isGuiVisible: boolean;
 
-	constructor(
-		radiusTop: number,
-		radiusBottom: number,
-		height: number,
-		radialSegments: number,
-		heightSegments: number
-	) {
-		this._geometry = new CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments);
-		this._material = new MeshStandardMaterial();
+	constructor(config: CylinderConfig) {
+		this._isGuiVisible = false;
+		this._geometry = new CylinderGeometry(config.radius, config.radius, config.height, 32);
+		this._material = new MeshStandardMaterial({ wireframe: true });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = "Cylinder";
 		this._mesh.userData.click = () => this.onClick();
+		this._mesh.userData.updateGeometry = (config: CylinderConfig) => this.updateGeometry(config);
+		this.initGui(config);
+	}
+
+	initGui(config: CylinderConfig) {
+		this._data = { ...config };
+		this._cylinderGui = new GUI({ title: "Cylinder", container: document.getElementById("gui") || undefined });
+		this.hideGui();
+
+		this._cylinderGui
+			.add(this._data, "radius", 0.1, 2, 0.1)
+			.onChange(() => this._mesh.userData.updateGeometry(this._data));
+		this._cylinderGui
+			.add(this._data, "height", 0.1, 2, 0.1)
+			.onChange(() => this._mesh.userData.updateGeometry(this._data));
+	}
+
+	updateGeometry(config: CylinderConfig) {
+		this._geometry = new CylinderGeometry(config.radius, config.radius, config.height);
+		this._mesh.geometry.dispose();
+		this._mesh.geometry = this._geometry;
 	}
 
 	onClick() {
-		console.log(this._mesh.geometry);
+		if (this._isGuiVisible) {
+			this.hideGui();
+		} else {
+			this.showGui();
+		}
+		this._isGuiVisible = !this._isGuiVisible;
+	}
+
+	showGui() {
+		this._cylinderGui.show();
+	}
+
+	hideGui() {
+		this._cylinderGui.hide();
 	}
 }
