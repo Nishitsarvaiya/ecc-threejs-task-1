@@ -1,4 +1,4 @@
-import { Mesh, MeshStandardMaterial, BoxGeometry } from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial } from "three";
 import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
 
 export default class CubeObject {

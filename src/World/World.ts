@@ -1,11 +1,8 @@
+import gsap from "gsap";
 import {
 	ACESFilmicToneMapping,
-	AmbientLight,
 	Clock,
-	DirectionalLight,
 	HemisphereLight,
-	LoadingManager,
-	Mesh,
 	Object3D,
 	Object3DEventMap,
 	PerspectiveCamera,
@@ -13,17 +10,15 @@ import {
 	SRGBColorSpace,
 	Scene,
 	Vector2,
-	Vector3,
 	WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import CubeObject from "../objects/CubeObject";
-import IcoSphereObject from "../objects/IcoSphereObject";
-import CylinderObject from "../objects/CylinderObject";
 import CubeGui from "../gui/CubeGui";
-import IcoGui from "../gui/IcoGui";
 import CylinderGui from "../gui/CylinderGui";
-import gsap from "gsap";
+import IcoGui from "../gui/IcoGui";
+import CubeObject from "../objects/CubeObject";
+import CylinderObject from "../objects/CylinderObject";
+import IcoSphereObject from "../objects/IcoSphereObject";
 
 export default class World {
 	_vw!: number;
@@ -161,35 +156,31 @@ export default class World {
 	}
 
 	focusOnObject = (object: Object3D<Object3DEventMap>) => {
-		let tl = gsap
-			.timeline({ defaults: { duration: 1.5, ease: "expo.out" } })
-			.to(this._controls.target, { x: object.position.x, y: object.position.y, z: object.position.z })
-			.to(
-				this._camera.position,
-				{
-					x: object.position.x,
-					y: object.position.y,
-					z: object.position.z + object.userData.zoomOutFactor,
-				},
-				0
-			);
+		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: "expo.out" } });
+		tl.to(this._controls.target, { x: object.position.x, y: object.position.y, z: object.position.z }).to(
+			this._camera.position,
+			{
+				x: object.position.x,
+				y: object.position.y,
+				z: object.position.z + object.userData.zoomOutFactor,
+			},
+			0
+		);
 		object.userData.click();
 		this._camera.updateProjectionMatrix();
 	};
 
 	resetView() {
-		let tl = gsap
-			.timeline({ defaults: { duration: 1.5, ease: "expo.out" } })
-			.to(this._controls.target, { x: 0, y: 0, z: 0 })
-			.to(
-				this._camera.position,
-				{
-					x: 0,
-					y: 0,
-					z: 10,
-				},
-				0
-			);
+		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: "expo.out" } });
+		tl.to(this._controls.target, { x: 0, y: 0, z: 0 }).to(
+			this._camera.position,
+			{
+				x: 0,
+				y: 0,
+				z: 10,
+			},
+			0
+		);
 		this._objects.forEach((obj) => obj.hideGui());
 	}
 

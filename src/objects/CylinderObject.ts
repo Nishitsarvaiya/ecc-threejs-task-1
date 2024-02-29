@@ -1,4 +1,4 @@
-import { Mesh, MeshStandardMaterial, CylinderGeometry } from "three";
+import { CylinderGeometry, Mesh, MeshStandardMaterial } from "three";
 import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
 
 export default class CylinderObject {
