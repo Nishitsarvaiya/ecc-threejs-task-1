@@ -1,5 +1,5 @@
-import { IcosahedronGeometry, Mesh, MeshStandardMaterial } from "three";
-import GUI from "three/examples/jsm/libs/lil-gui.module.min.js";
+import { IcosahedronGeometry, Mesh, MeshStandardMaterial } from 'three';
+import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
 export default class IcoSphereObject {
 	_geometry: IcosahedronGeometry;
@@ -12,9 +12,9 @@ export default class IcoSphereObject {
 	constructor(config: IcoConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new IcosahedronGeometry(config.radius, config.detail);
-		this._material = new MeshStandardMaterial({ wireframe: false });
+		this._material = new MeshStandardMaterial({ wireframe: false, transparent: true, opacity: 0 });
 		this._mesh = new Mesh(this._geometry, this._material);
-		this._mesh.userData.name = "IcoSphere";
+		this._mesh.userData.name = 'IcoSphere';
 		this._mesh.userData.zoomOutFactor = 2.5;
 		this._mesh.userData.click = () => this.onClick();
 		this._mesh.userData.updateGeometry = (config: IcoConfig) => this.updateGeometry(config);
@@ -23,13 +23,11 @@ export default class IcoSphereObject {
 
 	initGui(config: IcoConfig) {
 		this._data = { ...config };
-		this._icoGui = new GUI({ title: "IcoSphere", container: document.getElementById("gui") || undefined });
+		this._icoGui = new GUI({ title: 'IcoSphere', container: document.getElementById('gui') || undefined });
 		this.hideGui();
 
-		this._icoGui
-			.add(this._data, "radius", 0.1, 2, 0.1)
-			.onChange(() => this._mesh.userData.updateGeometry(this._data));
-		this._icoGui.add(this._data, "detail", 1, 10, 1).onChange(() => this._mesh.userData.updateGeometry(this._data));
+		this._icoGui.add(this._data, 'radius', 0.1, 2, 0.1).onChange(() => this._mesh.userData.updateGeometry(this._data));
+		this._icoGui.add(this._data, 'detail', 1, 10, 1).onChange(() => this._mesh.userData.updateGeometry(this._data));
 	}
 
 	updateGeometry(config: IcoConfig) {
@@ -49,9 +47,11 @@ export default class IcoSphereObject {
 
 	showGui() {
 		this._icoGui.show();
+		this._isGuiVisible = true;
 	}
 
 	hideGui() {
 		this._icoGui.hide();
+		this._isGuiVisible = false;
 	}
 }

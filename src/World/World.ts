@@ -1,8 +1,10 @@
-import gsap from "gsap";
+import gsap from 'gsap';
 import {
 	ACESFilmicToneMapping,
 	Clock,
+	Group,
 	HemisphereLight,
+	Mesh,
 	Object3D,
 	Object3DEventMap,
 	PerspectiveCamera,
@@ -11,14 +13,14 @@ import {
 	Scene,
 	Vector2,
 	WebGLRenderer,
-} from "three";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
-import CubeGui from "../gui/CubeGui";
-import CylinderGui from "../gui/CylinderGui";
-import IcoGui from "../gui/IcoGui";
-import CubeObject from "../objects/CubeObject";
-import CylinderObject from "../objects/CylinderObject";
-import IcoSphereObject from "../objects/IcoSphereObject";
+} from 'three';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import CubeGui from '../gui/CubeGui';
+import CylinderGui from '../gui/CylinderGui';
+import IcoGui from '../gui/IcoGui';
+import CubeObject from '../objects/CubeObject';
+import CylinderObject from '../objects/CylinderObject';
+import IcoSphereObject from '../objects/IcoSphereObject';
 
 export default class World {
 	_vw!: number;
@@ -39,6 +41,7 @@ export default class World {
 	_cubeConfig!: CubeConfig;
 	_icoConfig!: IcoConfig;
 	_cylinderConfig!: CylinderConfig;
+	_group!: Group;
 
 	constructor() {
 		this.initWorld();
@@ -69,14 +72,14 @@ export default class World {
 		this._vh = window.innerHeight;
 
 		// Create the Renderer
-		this._renderer = new WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+		this._renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 		this._renderer.outputColorSpace = SRGBColorSpace;
 		this._renderer.toneMapping = ACESFilmicToneMapping;
 		this._renderer.setClearColor(0x2f2f2f, 1);
 		this._renderer.setSize(this._vw, this._vh);
 		this._renderer.setPixelRatio(Math.min(Math.max(1, window.devicePixelRatio), 2));
 		this._canvas = this._renderer.domElement;
-		document.getElementById("gl")?.appendChild(this._canvas);
+		document.getElementById('gl')?.appendChild(this._canvas);
 
 		// Create the Camera
 		this._camera = new PerspectiveCamera(50, this._vw / this._vh, 0.01, 1000);
@@ -91,7 +94,7 @@ export default class World {
 		this._controls.update();
 
 		// Create the lights
-		const light = new HemisphereLight(0xffffff, "cornflowerblue", 3);
+		const light = new HemisphereLight(0xffffff, 'cornflowerblue', 3);
 
 		this._scene.add(light);
 
@@ -100,26 +103,30 @@ export default class World {
 		this._clock.start();
 
 		this.resize();
-		window.addEventListener("resize", () => this.resize());
+		window.addEventListener('resize', () => this.resize());
 		this.createObjects();
 		this.createRaycaster();
 		this._raf = window.requestAnimationFrame(() => this.update());
-		window.addEventListener("pointermove", (e) => this.onPointerMove(e));
-		window.addEventListener("click", () => this.onMeshClick());
-		document.getElementById("resetCamera")?.addEventListener("click", () => this.resetView());
+		window.addEventListener('pointermove', (e) => this.onPointerMove(e));
+		window.addEventListener('click', () => this.onMeshClick());
+		document.getElementById('resetCamera')?.addEventListener('click', () => this.resetView());
 	}
 
 	createObjects() {
 		const cube = new CubeObject(this._cubeConfig);
 		const ico = new IcoSphereObject(this._icoConfig);
 		const cylinder = new CylinderObject(this._cylinderConfig);
+		this._group = new Group();
 
 		cube._mesh.position.set(-4, 0, 0);
 		cylinder._mesh.position.set(4, 0, 0);
 
-		this._scene.add(cube._mesh);
-		this._scene.add(ico._mesh);
-		this._scene.add(cylinder._mesh);
+		this._group.add(cube._mesh);
+		this._group.add(ico._mesh);
+		this._group.add(cylinder._mesh);
+
+		this._scene.add(this._group);
+		this._group.children.forEach((mesh) => this.animateIn(mesh as Mesh));
 
 		this._objects = [];
 		this._objects.push(cube);
@@ -131,6 +138,26 @@ export default class World {
 	createRaycaster() {
 		this._raycaster = new Raycaster();
 		this._pointer = new Vector2(-1, -1);
+	}
+
+	animateIn(mesh: Mesh) {
+		let tl = gsap.timeline({ defaults: { duration: 2, ease: 'expo.inOut' } });
+		tl.to(
+			mesh.material,
+			{
+				opacity: 1,
+			},
+			'start'
+		).fromTo(
+			mesh.scale,
+			{ x: 0, y: 0, z: 0 },
+			{
+				x: 1,
+				y: 1,
+				z: 1,
+			},
+			'start'
+		);
 	}
 
 	onPointerMove(event: MouseEvent) {
@@ -156,7 +183,7 @@ export default class World {
 	}
 
 	focusOnObject = (object: Object3D<Object3DEventMap>) => {
-		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: "expo.out" } });
+		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: 'expo.out' } });
 		tl.to(this._controls.target, { x: object.position.x, y: object.position.y, z: object.position.z }).to(
 			this._camera.position,
 			{
@@ -171,7 +198,7 @@ export default class World {
 	};
 
 	resetView() {
-		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: "expo.out" } });
+		let tl = gsap.timeline({ defaults: { duration: 1.5, ease: 'expo.out' } });
 		tl.to(this._controls.target, { x: 0, y: 0, z: 0 }).to(
 			this._camera.position,
 			{
@@ -185,8 +212,8 @@ export default class World {
 	}
 
 	removeLoader() {
-		const loader = document.querySelector(".loader") as HTMLDivElement;
-		loader.style.display = "none";
+		const loader = document.querySelector('.loader') as HTMLDivElement;
+		loader.style.display = 'none';
 	}
 
 	update = () => {
