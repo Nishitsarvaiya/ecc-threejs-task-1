@@ -15,9 +15,6 @@ import {
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import CubeGui from '../gui/CubeGui';
-import CylinderGui from '../gui/CylinderGui';
-import IcoGui from '../gui/IcoGui';
 import CubeObject from '../objects/CubeObject';
 import CylinderObject from '../objects/CylinderObject';
 import IcoSphereObject from '../objects/IcoSphereObject';
@@ -35,9 +32,6 @@ export default class World {
 	_raycaster!: Raycaster;
 	_pointer!: Vector2;
 	_objects!: any[];
-	_cubeGui!: CubeGui;
-	_icoGui!: IcoGui;
-	_cylinderGui!: CylinderGui;
 	_cubeConfig!: CubeConfig;
 	_icoConfig!: IcoConfig;
 	_cylinderConfig!: CylinderConfig;
