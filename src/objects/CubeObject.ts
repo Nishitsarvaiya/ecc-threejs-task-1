@@ -12,9 +12,10 @@ export default class CubeObject {
 	constructor(config: CubeConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new BoxGeometry(config.width, config.height, config.depth);
-		this._material = new MeshStandardMaterial({ wireframe: true });
+		this._material = new MeshStandardMaterial({ wireframe: false });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = "Cube";
+		this._mesh.userData.zoomOutFactor = 3;
 		this._mesh.userData.click = () => this.onClick();
 		this._mesh.userData.updateGeometry = (config: CubeConfig) => this.updateGeometry(config);
 		this.initGui(config);

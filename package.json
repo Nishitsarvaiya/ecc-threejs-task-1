@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@types/dat.gui": "^0.7.12",
+    "gsap": "^3.12.5",
     "three": "^0.161.0"
   }
 }

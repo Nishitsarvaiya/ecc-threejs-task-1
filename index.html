@@ -5,11 +5,17 @@
 		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Vite + TS</title>
+		<link rel="stylesheet" href="/src/style.css" />
 	</head>
 	<body>
 		<div id="app">
+			<div class="error"></div>
 			<div id="gl"></div>
 			<div id="gui"></div>
+			<button id="resetCamera">Reset View</button>
+			<div class="loader">
+				<p>Please wait while your experience is loading...</p>
+			</div>
 		</div>
 		<script type="module" src="/src/main.ts"></script>
 	</body>

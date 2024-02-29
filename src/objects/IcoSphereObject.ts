@@ -12,9 +12,10 @@ export default class IcoSphereObject {
 	constructor(config: IcoConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new IcosahedronGeometry(config.radius, config.detail);
-		this._material = new MeshStandardMaterial({ wireframe: true });
+		this._material = new MeshStandardMaterial({ wireframe: false });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = "IcoSphere";
+		this._mesh.userData.zoomOutFactor = 2.5;
 		this._mesh.userData.click = () => this.onClick();
 		this._mesh.userData.updateGeometry = (config: IcoConfig) => this.updateGeometry(config);
 		this.initGui(config);

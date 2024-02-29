@@ -12,9 +12,10 @@ export default class CylinderObject {
 	constructor(config: CylinderConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new CylinderGeometry(config.radius, config.radius, config.height, 32);
-		this._material = new MeshStandardMaterial({ wireframe: true });
+		this._material = new MeshStandardMaterial({ wireframe: false });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = "Cylinder";
+		this._mesh.userData.zoomOutFactor = 4.5;
 		this._mesh.userData.click = () => this.onClick();
 		this._mesh.userData.updateGeometry = (config: CylinderConfig) => this.updateGeometry(config);
 		this.initGui(config);

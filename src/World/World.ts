@@ -1,10 +1,16 @@
 import {
+	ACESFilmicToneMapping,
 	AmbientLight,
 	Clock,
 	DirectionalLight,
+	HemisphereLight,
+	LoadingManager,
 	Mesh,
+	Object3D,
+	Object3DEventMap,
 	PerspectiveCamera,
 	Raycaster,
+	SRGBColorSpace,
 	Scene,
 	Vector2,
 	Vector3,
@@ -17,7 +23,7 @@ import CylinderObject from "../objects/CylinderObject";
 import CubeGui from "../gui/CubeGui";
 import IcoGui from "../gui/IcoGui";
 import CylinderGui from "../gui/CylinderGui";
-import { fitCameraToObject } from "../helpers";
+import gsap from "gsap";
 
 export default class World {
 	_vw!: number;
@@ -68,8 +74,10 @@ export default class World {
 		this._vh = window.innerHeight;
 
 		// Create the Renderer
-		this._renderer = new WebGLRenderer({ antialias: true });
-		this._renderer.setClearColor(0x121212, 1);
+		this._renderer = new WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+		this._renderer.outputColorSpace = SRGBColorSpace;
+		this._renderer.toneMapping = ACESFilmicToneMapping;
+		this._renderer.setClearColor(0x2f2f2f, 1);
 		this._renderer.setSize(this._vw, this._vh);
 		this._renderer.setPixelRatio(Math.min(Math.max(1, window.devicePixelRatio), 2));
 		this._canvas = this._renderer.domElement;
@@ -88,14 +96,9 @@ export default class World {
 		this._controls.update();
 
 		// Create the lights
-		const ambientLight = new AmbientLight();
-		const directionalLight = new DirectionalLight(0xffffff, 3);
-		directionalLight.position.set(2, 4, 10);
-		const directionalLight2 = new DirectionalLight(0xffffff, 1);
-		directionalLight2.position.set(-4, -3, -16);
-		this._scene.add(ambientLight);
-		this._scene.add(directionalLight);
-		this._scene.add(directionalLight2);
+		const light = new HemisphereLight(0xffffff, "cornflowerblue", 3);
+
+		this._scene.add(light);
 
 		// Create the Clock
 		this._clock = new Clock();
@@ -108,6 +111,7 @@ export default class World {
 		this._raf = window.requestAnimationFrame(() => this.update());
 		window.addEventListener("pointermove", (e) => this.onPointerMove(e));
 		window.addEventListener("click", () => this.onMeshClick());
+		document.getElementById("resetCamera")?.addEventListener("click", () => this.resetView());
 	}
 
 	createObjects() {
@@ -126,6 +130,7 @@ export default class World {
 		this._objects.push(cube);
 		this._objects.push(ico);
 		this._objects.push(cylinder);
+		this.removeLoader();
 	}
 
 	createRaycaster() {
@@ -149,16 +154,48 @@ export default class World {
 
 		if (intersects.length > 0) {
 			for (let i = 0; i < intersects.length; i++) {
-				intersects[i].object.userData.click();
+				const object = intersects[i].object;
+				this.focusOnObject(object);
 			}
 		}
 	}
 
-	resetCamera() {
-		this._camera.position.set(0, 0, 10);
-		this._camera.lookAt(0, 0, 0);
+	focusOnObject = (object: Object3D<Object3DEventMap>) => {
+		let tl = gsap
+			.timeline({ defaults: { duration: 1.5, ease: "expo.out" } })
+			.to(this._controls.target, { x: object.position.x, y: object.position.y, z: object.position.z })
+			.to(
+				this._camera.position,
+				{
+					x: object.position.x,
+					y: object.position.y,
+					z: object.position.z + object.userData.zoomOutFactor,
+				},
+				0
+			);
+		object.userData.click();
 		this._camera.updateProjectionMatrix();
-		this._controls.target = new Vector3(0, 0, 0);
+	};
+
+	resetView() {
+		let tl = gsap
+			.timeline({ defaults: { duration: 1.5, ease: "expo.out" } })
+			.to(this._controls.target, { x: 0, y: 0, z: 0 })
+			.to(
+				this._camera.position,
+				{
+					x: 0,
+					y: 0,
+					z: 10,
+				},
+				0
+			);
+		this._objects.forEach((obj) => obj.hideGui());
+	}
+
+	removeLoader() {
+		const loader = document.querySelector(".loader") as HTMLDivElement;
+		loader.style.display = "none";
 	}
 
 	update = () => {
