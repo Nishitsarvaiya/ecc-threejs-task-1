@@ -12,7 +12,7 @@ export default class CubeObject {
 	constructor(config: CubeConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new BoxGeometry(config.width, config.height, config.depth);
-		this._material = new MeshStandardMaterial({ wireframe: false, transparent: true, opacity: 0 });
+		this._material = new MeshStandardMaterial({ wireframe: false, transparent: true, opacity: 0, color: '#FF5666' });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = 'Cube';
 		this._mesh.userData.zoomOutFactor = 3;

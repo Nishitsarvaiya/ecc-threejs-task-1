@@ -12,7 +12,7 @@ export default class IcoSphereObject {
 	constructor(config: IcoConfig) {
 		this._isGuiVisible = false;
 		this._geometry = new IcosahedronGeometry(config.radius, config.detail);
-		this._material = new MeshStandardMaterial({ wireframe: false, transparent: true, opacity: 0 });
+		this._material = new MeshStandardMaterial({ wireframe: false, transparent: true, opacity: 0, color: '#C5D86D' });
 		this._mesh = new Mesh(this._geometry, this._material);
 		this._mesh.userData.name = 'IcoSphere';
 		this._mesh.userData.zoomOutFactor = 2.5;
